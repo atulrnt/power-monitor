@@ -1,101 +1,47 @@
-#define PAUSE 50;
-#define LED_RED 9
-#define LED_GREEN 10
-#define LED_BLUE 11
 
-float brightness = 0.7; 
-int buttonState = 0;         // current state of the button
-int lastButtonState = 0;
-int buttonDuration = 0;
-int rainbowState = true;
-
-int counter = 0;
-
-// Number of colors used for animating, higher = smoother and slower animation)
-int numColors = 255;
-
-void setup() {
-  Serial.begin(9600);
-  pinMode(LED_RED, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT);
-  pinMode(LED_BLUE, OUTPUT);
-  pinMode(A0,INPUT_PULLUP);
-}
-
-void loop() {
-  buttonState = digitalRead(A0);
-  
-  if (rainbowState) {
-    rainbow();
-  }
-
-  if (buttonState == LOW) {
-    buttonDuration = buttonDuration + 1;
-  }
-
-  if (buttonState == HIGH && buttonDuration > 0) {
-    if (buttonDuration >= 1000 / 50) {
-      rainbow();
-    } else {
-      randomRGB();
-    }
-
-    buttonDuration = 0;
-  }
-  
-  // save the current state as the last state, for next time through the loop
-  lastButtonState = buttonState;
-
-  delay(50);
-}
 
 void rainbow() {
-  Serial.println("[[[ RAINBOW ]]]");
+    rainbowState = true;
 
-  rainbowState = true;
-  
+    // This part takes care of displaying the
+    // color changing in reverse by counting backwards if counter
+    // is above the number of available colors  
+    float colorNumber = counter > numColors ? counter - numColors: counter;
 
-   // This part takes care of displaying the
- // color changing in reverse by counting backwards if counter
- // is above the number of available colors  
- float colorNumber = counter > numColors ? counter - numColors: counter;
- 
- // Play with the saturation and brightness values
- // to see what they do
- float saturation = 1; // Between 0 and 1 (0 = gray, 1 = full color)
- float hue = (colorNumber / float(numColors)) * 360; // Number between 0 and 360
- long color = HSBtoRGB(hue, saturation, brightness);
- 
- // Get the red, blue and green parts from generated color
- int red = color >> 16 & 255;
- int green = color >> 8 & 255;
- int blue = color & 255;
+    // Play with the saturation and brightness values
+    // to see what they do
+    float saturation = 1; // Between 0 and 1 (0 = gray, 1 = full color)
+    float hue = (colorNumber / float(numColors)) * 360; // Number between 0 and 360
+    long color = HSBtoRGB(hue, saturation, brightness);
 
- setColor(red, green, blue);
- 
- // Counter can never be greater then 2 times the number of available colors
- // the colorNumber = line above takes care of counting backwards (nicely looping animation)
- // when counter is larger then the number of available colors
- counter = (counter + 1) % (numColors * 2);
- 
- // If you uncomment this line the color changing starts from the
- // beginning when it reaches the end (animation only plays forward)
- // counter = (counter + 1) % (numColors);
+    // Get the red, blue and green parts from generated color
+    int red = color >> 16 & 255;
+    int green = color >> 8 & 255;
+    int blue = color & 255;
+
+    setColor(red, green, blue);
+
+    // Counter can never be greater then 2 times the number of available colors
+    // the colorNumber = line above takes care of counting backwards (nicely looping animation)
+    // when counter is larger then the number of available colors
+    counter = (counter + 1) % (numColors * 2);
+
+    // If you uncomment this line the color changing starts from the
+    // beginning when it reaches the end (animation only plays forward)
+    // counter = (counter + 1) % (numColors);
 }
 
 void randomRGB() {
-  Serial.println("[[[ RANDOM ]]]");
-  
-  rainbowState = false;
+    rainbowState = false;
 
-  long color = HSBtoRGB(random(360), 1, brightness);
+    long color = HSBtoRGB(random(360), 1, brightness);
  
- // Get the red, blue and green parts from generated color
- int red = color >> 16 & 255;
- int green = color >> 8 & 255;
- int blue = color & 255;
+    // Get the red, blue and green parts from generated color
+    int red = color >> 16 & 255;
+    int green = color >> 8 & 255;
+    int blue = color & 255;
 
- setColor(red, green, blue);
+    setColor(red, green, blue);
  
 }
 
